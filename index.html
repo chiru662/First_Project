@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>MCQ Quiz (HTML/DBMS/Java/Python)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+        .question { margin-bottom: 12px; padding: 10px; border-radius: 8px; background: #f7f7f7; }
+        button { padding: 10px 14px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button:disabled { background: #999; cursor: not-allowed; }
+        .hidden { display: none; }
+        #result { margin-top: 16px; font-weight: bold; }
+        label { display:block; margin:6px 0 3px; }
+        input[type="text"] { padding:8px; width:100%; box-sizing: border-box; margin-bottom:10px; }
+        select { padding:8px; width:100%; box-sizing: border-box; margin-bottom:10px; }
+        .explanation { margin-top:6px; font-size:0.95em; color:#333; }
+    </style>
+</head>
+<body>
+    <h1>MCQ Quiz</h1>
+    <p>This quiz supports four languages: <strong>HTML, DBMS, Java, Python</strong>. Difficulty: <em>Intermediate</em>.</p>
+
+    <label for="userName">Your name</label>
+    <input type="text" id="userName" placeholder="Enter your name">
+
+    <label for="languageSelect">Select language</label>
+    <select id="languageSelect">
+        <option value="">-- Select --</option>
+        <option value="html">HTML</option>
+        <option value="dbms">DBMS</option>
+        <option value="java">Java</option>
+        <option value="python">Python</option>
+    </select>
+
+    <button id="startBtn">Start Quiz</button>
+
+    <div id="quizContainer" class="hidden"></div>
+
+    <div id="result"></div>
+
+<script>
+// ======== QUESTIONS DATA ========
+const quizzes = {
+    html: [
+        { q: "Which tag is used to create a hyperlink in HTML?", options: ["&lt;a&gt;", "&lt;link&gt;", "&lt;href&gt;", "&lt;url&gt;"], answer: 0, exp: "The &lt;a&gt; tag creates links using the href attribute." },
+        { q: "Which attribute is used to define inline styles?", options: ["style", "class", "font", "styles"], answer: 0, exp: "The style attribute holds inline CSS declarations." },
+        { q: "Which HTML tag is used for the largest heading?", options: ["&lt;h6&gt;", "&lt;h1&gt;", "&lt;head&gt;", "&lt;header&gt;"], answer: 1, exp: "&lt;h1&gt; is the top-level heading." },
+        { q: "Which tag is used to display an image?", options: ["&lt;img&gt;", "&lt;image&gt;", "&lt;src&gt;", "&lt;pic&gt;"], answer: 0, exp: "Use &lt;img src='...'&gt; with alt text." },
+        { q: "Which tag is used to create an unordered list?", options: ["&lt;ul&gt;", "&lt;ol&gt;", "&lt;li&gt;", "&lt;list&gt;"], answer: 0, exp: "&lt;ul&gt; defines an unordered list; &lt;li&gt; are list items." },
+        { q: "What is the correct HTML element for inserting a line break?", options: ["&lt;break&gt;", "&lt;br&gt;", "&lt;lb&gt;", "&lt;line&gt;"], answer: 1, exp: "&lt;br&gt; inserts a line break." },
+        { q: "Which tag is used to define a table row?", options: ["&lt;tr&gt;", "&lt;td&gt;", "&lt;th&gt;", "&lt;row&gt;"], answer: 0, exp: "&lt;tr&gt; wraps cells in a row." },
+        { q: "Which HTML attribute is used to specify an alternate text for an image?", options: ["alt", "title", "src", "href"], answer: 0, exp: "alt provides descriptive text for accessibility." },
+        { q: "Which HTML element is used for the title of the document?", options: ["&lt;meta&gt;", "&lt;title&gt;", "&lt;head&gt;", "&lt;header&gt;"], answer: 1, exp: "The &lt;title&gt; element inside &lt;head&gt; sets the page title." },
+        { q: "HTML stands for?", options: ["Hyper Text Markup Language", "High Text Markup Language", "Hyperlinks and Text Markup Language", "Home Tool Markup Language"], answer: 0, exp: "Standard expansion: Hyper Text Markup Language." }
+    ],
+    dbms: [
+        { q: "Which of the following is a primary key feature?", options: ["Unique & Not Null", "Only Unique", "Only Not Null", "Can be Null"], answer: 0, exp: "Primary key must be unique and not null." },
+        { q: "Which SQL command is used to remove a table?", options: ["DELETE", "DROP", "REMOVE", "TRUNCATE"], answer: 1, exp: "DROP TABLE removes the table structure." },
+        { q: "What does ACID stand for in DBMS?", options: ["Atomicity, Consistency, Isolation, Durability", "Accuracy, Consistency, Integrity, Durability", "Atomicity, Clarity, Isolation, Durability", "Atomic, Consistent, Integrity, Durable"], answer: 0, exp: "ACID = Atomicity, Consistency, Isolation, Durability." },
+        { q: "Which SQL statement is used to extract data?", options: ["GET", "SELECT", "EXTRACT", "FETCH"], answer: 1, exp: "SELECT retrieves rows from tables." },
+        { q: "Which of these is NOT a type of join?", options: ["INNER JOIN", "OUTER JOIN", "FULL JOIN", "EQUAL JOIN"], answer: 3, exp: "EQUAL JOIN is not a valid SQL join type." },
+        { q: "Which command is used to change data in SQL?", options: ["MODIFY", "CHANGE", "UPDATE", "ALTER"], answer: 2, exp: "UPDATE modifies data rows." },
+        { q: "A foreign key is used to?", options: ["Link tables", "Store images", "Delete records", "None"], answer: 0, exp: "Foreign key enforces relationships between tables." },
+        { q: "Which data model uses entities and relationships?", options: ["Hierarchical", "ER Model", "Network", "Object-Oriented"], answer: 1, exp: "ER (Entity-Relationship) model uses entities and relationships." },
+        { q: "Which clause is used with GROUP BY?", options: ["HAVING", "WHERE", "ORDER BY", "SELECT"], answer: 0, exp: "HAVING filters groups (WHERE filters rows)." },
+        { q: "In DBMS, normalization is used for?", options: ["Remove redundancy", "Increase redundancy", "Create duplicates", "None"], answer: 0, exp: "Normalization reduces redundancy and update anomalies." }
+    ],
+    java: [
+        { q: "Which keyword is used to inherit a class in Java?", options: ["this", "extends", "implements", "super"], answer: 1, exp: "extends is used for class inheritance." },
+        { q: "Java is?", options: ["Compiled", "Interpreted", "Both", "None"], answer: 2, exp: "Java source is compiled to bytecode then interpreted/JIT by JVM." },
+        { q: "Which method is the entry point of Java programs?", options: ["start()", "main()", "run()", "init()"], answer: 1, exp: "public static void main(String[] args) is entry point." },
+        { q: "Which keyword is used to create objects?", options: ["class", "new", "obj", "instance"], answer: 1, exp: "new creates instances of classes." },
+        { q: "Which of these is not a primitive type?", options: ["int", "String", "float", "boolean"], answer: 1, exp: "String is a class, not a primitive." },
+        { q: "Which package is automatically imported?", options: ["java.util", "java.lang", "java.io", "java.net"], answer: 1, exp: "java.lang is imported by default." },
+        { q: "Which loop checks condition after execution?", options: ["for", "while", "do-while", "foreach"], answer: 2, exp: "do-while executes the body before checking condition." },
+        { q: "Which symbol is used for single-line comments?", options: ["//", "/* */", "#", "--"], answer: 0, exp: "// starts a single-line comment." },
+        { q: "Which operator is used for equality when comparing primitives?", options: ["==", "=", "!=", "equals"], answer: 0, exp: "== checks primitive equality; use .equals() for objects." },
+        { q: "Which keyword is used to stop loop?", options: ["stop", "end", "break", "exit"], answer: 2, exp: "break exits the nearest loop." }
+    ],
+    python: [
+        { q: "Which symbol is used for comments in Python?", options: ["//", "#", "/* */", "&lt;!-- --&gt;"], answer: 1, exp: "Use # for comments in Python." },
+        { q: "Python is?", options: ["Compiled", "Interpreted", "Both", "None"], answer: 1, exp: "Python is generally interpreted." },
+        { q: "Which function is used to output text?", options: ["echo()", "printf()", "print()", "display()"], answer: 2, exp: "print() outputs text to stdout." },
+        { q: "Which keyword is used to define functions?", options: ["function", "def", "fun", "define"], answer: 1, exp: "def defines functions." },
+        { q: "Which data type is immutable?", options: ["list", "dict", "set", "tuple"], answer: 3, exp: "Tuples are immutable." },
+        { q: "Which operator is used for exponentiation?", options: ["^", "", "//", ""], answer: 1, exp: "* computes power in Python." },
+        { q: "What is the output of 3 == 3?", options: ["True", "False", "Error", "None"], answer: 0, exp: "3 == 3 evaluates to True." },
+        { q: "Which statement is used for loops?", options: ["loop", "iterate", "for", "repeat"], answer: 2, exp: "for is used for loops in Python." },
+        { q: "Which function gives length?", options: ["size()", "len()", "count()", "length()"], answer: 1, exp: "len() returns length of iterable." },
+        { q: "Which keyword is used to exit loop?", options: ["stop", "break", "exit", "quit"], answer: 1, exp: "break exits loops." }
+    ]
+};
+
+// ======== UI and Logic ========
+const startBtn = document.getElementById('startBtn');
+const quizContainer = document.getElementById('quizContainer');
+const languageSelect = document.getElementById('languageSelect');
+const userNameInput = document.getElementById('userName');
+const resultDiv = document.getElementById('result');
+
+startBtn.addEventListener('click', () => {
+    const lang = languageSelect.value;
+    if (!lang) { alert('Please select a language'); return; }
+    if (!userNameInput.value.trim()) { alert('Please enter your name'); return; }
+    renderQuiz(lang);
+});
+
+function renderQuiz(lang) {
+    quizContainer.innerHTML = '';
+    const questions = quizzes[lang];
+    questions.forEach((q, i) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        let html = <strong>Q${i+1}: ${q.q}</strong><br>;
+        q.options.forEach((opt, idx) => {
+            const id = q${i}_opt${idx};
+            html += <label><input type="radio" name="q${i}" id="${id}" value="${idx}"> ${opt}</label>;
+        });
+        html += <div class="explanation hidden" id="exp${i}"></div>;
+        div.innerHTML = html;
+        quizContainer.appendChild(div);
+    });
+    const submitBtn = document.createElement('button');
+    submitBtn.textContent = 'Submit Quiz';
+    submitBtn.onclick = () => submitQuiz(lang);
+    quizContainer.appendChild(submitBtn);
+    quizContainer.classList.remove('hidden');
+    resultDiv.innerHTML = '';
+}
+
+function submitQuiz(lang) {
+    const questions = quizzes[lang];
+    let score = 0;
+    const answersText = [];
+    const explanations = [];
+    questions.forEach((q, i) => {
+        const selected = document.querySelector(input[name='q${i}']:checked);
+        if (selected) {
+            const val = parseInt(selected.value);
+            answersText.push(q.options[val]);
+            if (val === q.answer) score++;
+        } else {
+            answersText.push('Not answered');
+        }
+        explanations.push(q.exp || '');
+        // show explanation
+        const expDiv = document.getElementById('exp' + i);
+        expDiv.textContent = 'Explanation: ' + (q.exp || '');
+        expDiv.classList.remove('hidden');
+    });
+
+    resultDiv.innerHTML = <div>You scored <strong>${score}</strong> out of ${questions.length}</div>;
+
+    // Send to Google Sheets via Apps Script Web App
+    const payload = {
+        name: userNameInput.value.trim(),
+        language: lang,
+        answers: answersText,
+        score: score
+    };
+
+    // TODO: Replace with your deployed Web App URL
+    const WEB_APP_URL = "REPLACE_WITH_YOUR_WEB_APP_URL";
+
+    if (WEB_APP_URL.startsWith("REPLACE_WITH")) {
+        console.log("DEBUG: Web App URL not set. Submission skipped.");
+        // Show friendly note
+        const p = document.createElement('p');
+        p.style.marginTop = '8px';
+        p.textContent = 'Note: Results not sent because Web App URL is not configured. Edit index.html and set your Web App URL to enable saving to Google Sheets.';
+        resultDiv.appendChild(p);
+        return;
+    }
+
+    fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        console.log('Saved:', data);
+        const p = document.createElement('p');
+        p.textContent = 'Results saved to Google Sheets.';
+        resultDiv.appendChild(p);
+    })
+    .catch(err => {
+        console.error('Error saving:', err);
+        const p = document.createElement('p');
+        p.textContent = 'Error saving results. Check console for details.';
+        resultDiv.appendChild(p);
+    });
+}
+</script>
+</body>
+</html>
