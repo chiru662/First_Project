@@ -151,47 +151,6 @@ function submitQuiz(lang) {
     });
 
     resultDiv.innerHTML = <div>You scored <strong>${score}</strong> out of ${questions.length}</div>;
-
-    // Send to Google Sheets via Apps Script Web App
-    const payload = {
-        name: userNameInput.value.trim(),
-        language: lang,
-        answers: answersText,
-        score: score
-    };
-
-    // TODO: Replace with your deployed Web App URL
-    const WEB_APP_URL = "REPLACE_WITH_YOUR_WEB_APP_URL";
-
-    if (WEB_APP_URL.startsWith("REPLACE_WITH")) {
-        console.log("DEBUG: Web App URL not set. Submission skipped.");
-        // Show friendly note
-        const p = document.createElement('p');
-        p.style.marginTop = '8px';
-        p.textContent = 'Note: Results not sent because Web App URL is not configured. Edit index.html and set your Web App URL to enable saving to Google Sheets.';
-        resultDiv.appendChild(p);
-        return;
-    }
-
-    fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(data => {
-        console.log('Saved:', data);
-        const p = document.createElement('p');
-        p.textContent = 'Results saved to Google Sheets.';
-        resultDiv.appendChild(p);
-    })
-    .catch(err => {
-        console.error('Error saving:', err);
-        const p = document.createElement('p');
-        p.textContent = 'Error saving results. Check console for details.';
-        resultDiv.appendChild(p);
-    });
 }
 </script>
 </body>
